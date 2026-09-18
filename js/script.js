@@ -1,5 +1,5 @@
-// Konfigurasi Limit (Opsional)
-const SPENDING_LIMIT = 500000; // Contoh limit Rp 500.000
+// Budget Limit Configuration (Optional Feature)
+const SPENDING_LIMIT = 5000; // Example limit: $5000
 
 // DOM Elements
 const form = document.getElementById('transactionForm');
@@ -16,13 +16,13 @@ const themeToggleBtn = document.getElementById('themeToggleBtn');
 let transactions = JSON.parse(localStorage.getItem('transactions')) || [];
 let chartInstance = null;
 
-// Init App
+// Initialize Application
 function init() {
   renderUI();
   initChart();
 }
 
-// Save & Render
+// Save to LocalStorage & Render
 function saveAndRender() {
   localStorage.setItem('transactions', JSON.stringify(transactions));
   renderUI();
@@ -39,7 +39,7 @@ function renderUI() {
   } else if (sortVal === 'lowest') {
     sortedList.sort((a, b) => a.amount - b.amount);
   } else {
-    sortedList.reverse(); // Default: Terbaru
+    sortedList.reverse(); // Default: Newest first
   }
 
   sortedList.forEach((item) => {
@@ -51,16 +51,16 @@ function renderUI() {
         <small>${item.category}</small>
       </div>
       <div>
-        <span>Rp ${item.amount.toLocaleString('id-ID')}</span>
-        <button class="delete-btn" onclick="deleteTransaction(${item.id})">Hapus</button>
+        <span>$${item.amount.toFixed(2)}</span>
+        <button class="delete-btn" onclick="deleteTransaction(${item.id})">Delete</button>
       </div>
     `;
     listContainer.appendChild(li);
   });
 
-  // 2. Render Total Balance
+  // 2. Render Total Expenses
   const total = transactions.reduce((acc, curr) => acc + curr.amount, 0);
-  totalBalanceEl.textContent = `Rp ${total.toLocaleString('id-ID')}`;
+  totalBalanceEl.textContent = `$${total.toFixed(2)}`;
 
   // 3. Check Limit Warning (Optional Feature)
   if (total > SPENDING_LIMIT) {
@@ -73,7 +73,7 @@ function renderUI() {
   updateChart();
 }
 
-// Add Transaction
+// Add Transaction Event
 form.addEventListener('submit', (e) => {
   e.preventDefault();
   
@@ -136,7 +136,7 @@ function updateChart() {
   chartInstance.update();
 }
 
-// Sorting Listener (Optional Feature)
+// Sorting Event Listener (Optional Feature)
 sortSelect.addEventListener('change', renderUI);
 
 // Dark/Light Mode Toggle (Optional Feature)
