@@ -1,5 +1,5 @@
-// Budget Limit Configuration (Optional Feature)
-const SPENDING_LIMIT = 500; // Example budget limit: $500
+// Budget Limit Configuration
+const SPENDING_LIMIT = 500; 
 
 // DOM Elements
 const form = document.getElementById('transactionForm');
@@ -16,12 +16,9 @@ const themeToggleBtn = document.getElementById('themeToggleBtn');
 let transactions = JSON.parse(localStorage.getItem('transactions')) || [];
 let chartInstance = null;
 
-// Helper to Format Currency strictly to USD ($)
+// Format Currency Strictly to USD ($)
 function formatUSD(amount) {
-  return new Intl.NumberFormat('en-US', {
-    style: 'currency',
-    currency: 'USD'
-  }).format(amount);
+  return `$${Number(amount).toFixed(2)}`;
 }
 
 // Initialize Application
@@ -41,13 +38,13 @@ function renderUI() {
   listContainer.innerHTML = '';
   
   let sortedList = [...transactions];
-  const sortVal = sortSelect.value;
+  const sortVal = sortSelect ? sortSelect.value : 'newest';
   if (sortVal === 'highest') {
     sortedList.sort((a, b) => b.amount - a.amount);
   } else if (sortVal === 'lowest') {
     sortedList.sort((a, b) => a.amount - b.amount);
   } else {
-    sortedList.reverse(); // Default: Newest first
+    sortedList.reverse();
   }
 
   sortedList.forEach((item) => {
@@ -59,7 +56,7 @@ function renderUI() {
     
     const actionDiv = document.createElement('div');
     const amountSpan = document.createElement('span');
-    amountSpan.textContent = formatUSD(item.amount); // STRICTLY $ DOLLAR FORMAT
+    amountSpan.textContent = formatUSD(item.amount); // KUNCI UTAMA SIMBOL $
     
     const deleteBtn = document.createElement('button');
     deleteBtn.className = 'delete-btn';
@@ -77,13 +74,15 @@ function renderUI() {
 
   // 2. Render Total Expenses
   const total = transactions.reduce((acc, curr) => acc + Number(curr.amount), 0);
-  totalBalanceEl.textContent = formatUSD(total); // STRICTLY $ DOLLAR FORMAT
+  totalBalanceEl.textContent = formatUSD(total); // KUNCI UTAMA SIMBOL $
 
-  // 3. Check Limit Warning (Optional Feature)
-  if (total > SPENDING_LIMIT) {
-    limitWarningEl.classList.remove('hidden');
-  } else {
-    limitWarningEl.classList.add('hidden');
+  // 3. Check Limit Warning
+  if (limitWarningEl) {
+    if (total > SPENDING_LIMIT) {
+      limitWarningEl.classList.remove('hidden');
+    } else {
+      limitWarningEl.classList.add('hidden');
+    }
   }
 
   // 4. Update Chart
@@ -110,7 +109,6 @@ form.addEventListener('submit', (e) => {
   transactions.push(newTransaction);
   saveAndRender();
 
-  // Reset Form
   form.reset();
 });
 
@@ -122,7 +120,9 @@ function deleteTransaction(id) {
 
 // Chart.js Setup
 function initChart() {
-  const ctx = document.getElementById('expenseChart').getContext('2d');
+  const chartCanvas = document.getElementById('expenseChart');
+  if (!chartCanvas) return;
+  const ctx = chartCanvas.getContext('2d');
   chartInstance = new Chart(ctx, {
     type: 'pie',
     data: {
@@ -153,15 +153,16 @@ function updateChart() {
   chartInstance.update();
 }
 
-// Sorting Event Listener (Optional Feature)
-sortSelect.addEventListener('change', renderUI);
+if (sortSelect) {
+  sortSelect.addEventListener('change', renderUI);
+}
 
-// Dark/Light Mode Toggle (Optional Feature)
-themeToggleBtn.addEventListener('click', () => {
-  document.body.classList.toggle('dark-mode');
-  const isDark = document.body.classList.contains('dark-mode');
-  themeToggleBtn.textContent = isDark ? '☀️ Light Mode' : '🌙 Dark Mode';
-});
+if (themeToggleBtn) {
+  themeToggleBtn.addEventListener('click', () => {
+    document.body.classList.toggle('dark-mode');
+    const isDark = document.body.classList.contains('dark-mode');
+    themeToggleBtn.textContent = isDark ? '☀️ Light Mode' : '🌙 Dark Mode';
+  });
+}
 
-// Run Init
 init();
