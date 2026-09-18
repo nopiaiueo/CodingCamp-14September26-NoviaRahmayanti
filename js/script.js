@@ -16,6 +16,14 @@ const themeToggleBtn = document.getElementById('themeToggleBtn');
 let transactions = JSON.parse(localStorage.getItem('transactions')) || [];
 let chartInstance = null;
 
+// Helper to Format Currency strictly to USD ($)
+function formatUSD(amount) {
+  return new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: 'USD'
+  }).format(amount);
+}
+
 // Initialize Application
 function init() {
   renderUI();
@@ -45,22 +53,31 @@ function renderUI() {
   sortedList.forEach((item) => {
     const li = document.createElement('li');
     li.className = 'transaction-item';
-    li.innerHTML = `
-      <div>
-        <strong>${item.name}</strong> <br>
-        <small>${item.category}</small>
-      </div>
-      <div>
-        <span>$${item.amount.toFixed(2)}</span>
-        <button class="delete-btn" onclick="deleteTransaction(${item.id})">Delete</button>
-      </div>
-    `;
+    
+    const detailsDiv = document.createElement('div');
+    detailsDiv.innerHTML = `<strong>${item.name}</strong><br><small>${item.category}</small>`;
+    
+    const actionDiv = document.createElement('div');
+    const amountSpan = document.createElement('span');
+    amountSpan.textContent = formatUSD(item.amount); // STRICTLY $ DOLLAR FORMAT
+    
+    const deleteBtn = document.createElement('button');
+    deleteBtn.className = 'delete-btn';
+    deleteBtn.textContent = 'Delete';
+    deleteBtn.addEventListener('click', () => deleteTransaction(item.id));
+    
+    actionDiv.appendChild(amountSpan);
+    actionDiv.appendChild(deleteBtn);
+    
+    li.appendChild(detailsDiv);
+    li.appendChild(actionDiv);
+    
     listContainer.appendChild(li);
   });
 
   // 2. Render Total Expenses
-  const total = transactions.reduce((acc, curr) => acc + curr.amount, 0);
-  totalBalanceEl.textContent = `$${total.toFixed(2)}`;
+  const total = transactions.reduce((acc, curr) => acc + Number(curr.amount), 0);
+  totalBalanceEl.textContent = formatUSD(total); // STRICTLY $ DOLLAR FORMAT
 
   // 3. Check Limit Warning (Optional Feature)
   if (total > SPENDING_LIMIT) {
@@ -78,10 +95,10 @@ form.addEventListener('submit', (e) => {
   e.preventDefault();
   
   const name = itemNameInput.value.trim();
-  const amount = Number(amountInput.value);
+  const amount = parseFloat(amountInput.value);
   const category = categoryInput.value;
 
-  if (!name || !amount || !category) return;
+  if (!name || isNaN(amount) || amount <= 0 || !category) return;
 
   const newTransaction = {
     id: Date.now(),
@@ -128,7 +145,7 @@ function updateChart() {
   const totals = { Food: 0, Transport: 0, Fun: 0 };
   transactions.forEach(t => {
     if (totals[t.category] !== undefined) {
-      totals[t.category] += t.amount;
+      totals[t.category] += Number(t.amount);
     }
   });
 
