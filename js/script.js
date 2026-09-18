@@ -1,5 +1,5 @@
 // Budget Limit Configuration (Optional Feature)
-const SPENDING_LIMIT = 5000; // Example limit: $5000
+const SPENDING_LIMIT = 500; // Example budget limit: $500
 
 // DOM Elements
 const form = document.getElementById('transactionForm');
